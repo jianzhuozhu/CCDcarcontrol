@@ -298,9 +298,12 @@ void setup()
 void loop()
 {
   uint8_t midVal=ccdFindMidVal();
+  float u;
   if(midVal!=255)
   {
-  
+  u=midVal/6.4;
+  TARGETL=TARGETL+u;
+  TARGETR=TARGETR+u;
   //通过串口绘图，观察波型
   Serial.print(velocityL);
   Serial.print("       ");
