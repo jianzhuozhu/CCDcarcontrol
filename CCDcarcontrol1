@@ -61,7 +61,7 @@ void readTsl1401(void)
   digitalWrite(CLK_PIN, LOW);
 }
 
-//CCD寻找中值函数返回值为中值
+//找到中线位置
 uint8_t ccdFindMidVal(void)
 {
   uint8_t i, j, left, right, _ccdMidVal;
@@ -117,54 +117,6 @@ uint8_t ccdFindMidVal(void)
   }
   else
     _ccdMidVal = (uint8_t)((right + left) / 2); //计算中线位置
-  return _ccdMidVal;
-}
-
-//CCD寻找中值函数返回值为左值
-uint8_t ccdFindleftVal(void)
-{
-  uint8_t i, j, left, right, _ccdMidVal;
-  float maxVal, minVal;
-  readTsl1401();
-  maxVal = _adVal[0]; //动态阈值算法，读取最大和最小值
-  for (i = 5; i < 30; i++) //两边各去掉5个点
-  {
-    if (maxVal <= _adVal[i])
-    {
-      maxVal = _adVal[i];
-    }
-  }
-  minVal = _adVal[0]; //最小值
-  for (i = 5; i < 30; i++)
-  {
-    if (minVal >= _adVal[i])
-      minVal = _adVal[i];
-  }
-  _ccdThreshold = (maxVal + minVal) / 2.0; //计算出本次中线緹取的國值
-  return _ccdMidVal;
-}
-
-//CCD寻找中值函数返回值为右值
-uint8_t ccdFindrightVal(void)
-{
-  uint8_t i, j, left, right, _ccdMidVal;
-  float maxVal, minVal;
-  readTsl1401();
-  maxVal = _adVal[0]; //动态阈值算法，读取最大和最小值
-  for (i = 90; i < 123; i++) //两边各去掉5个点
-  {
-    if (maxVal <= _adVal[i])
-    {
-      maxVal = _adVal[i];
-    }
-  }
-  minVal = _adVal[0]; //最小值
-  for (i = 90; i < 123; i++)
-  {
-    if (minVal >= _adVal[i])
-      minVal = _adVal[i];
-  }
-  _ccdThreshold = (maxVal + minVal) / 2.0; //计算出本次中线緹取的國值
   return _ccdMidVal;
 }
 
@@ -323,6 +275,7 @@ void setup()
   pinMode(ENCODER_BL, INPUT);
   pinMode(ENCODER_AR, INPUT);
   pinMode(ENCODER_BR, INPUT);
+  ccdInit();
   Serial.begin(9600);
   attachInterrupt(0, getEncoderL, CHANGE);
   attachInterrupt(1, getEncoderR, CHANGE);
@@ -345,25 +298,10 @@ void setup()
 void loop()
 {
   uint8_t midVal=ccdFindMidVal();
-  uint8_t leftVal=ccdFindleftVal();
-  uint8_t rightVal=ccdFindrightVal();
-  if((midVal-leftVal)<40)
+  if(midVal!=255)
   {
-    TARGETL=-40;
-  }
-  else
-  {
-    TARGETL=-30;
-  }
-  if((midVal-rightVal)<40)
-  {
-    TARGETR=40;
-  }
-  else
-  {
-    TARGETR=30;
-  }
-  //通过串口绘图，观察波形
+  
+  //通过串口绘图，观察波型
   Serial.print(velocityL);
   Serial.print("       ");
   Serial.print(velocityR);
